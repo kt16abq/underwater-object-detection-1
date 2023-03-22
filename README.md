@@ -1,4 +1,4 @@
-# Kesci Underwater Object Detection Algorithm Baseline <font color=red>**A list mAP 48.7**</font><br />
+# Underwater Object Detection Algorithm Baseline <font color=red>**A list mAP 48.7**</font><br />
 
 
 
