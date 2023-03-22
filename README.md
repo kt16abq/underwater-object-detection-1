@@ -1,8 +1,6 @@
-# Kesci Underwater Object Detection Algorithm Competition underwater object detection algorithm contest Baseline <font color=red>**A list mAP 48.7**</font><br />
+# Kesci Underwater Object Detection Algorithm Baseline <font color=red>**A list mAP 48.7**</font><br />
 
-## Competition address: [Kesci underwater target detection] (https://www.kesci.com/home/competition/5e535a612537a0002ca864ac)
 
-## Please refer to the updated [repo](https://github.com/zhengye1995/kesci-2021-underwater-optics) for URPC 2021!!!
 
 ## Update Tried what doesn't work:
 
