@@ -177,8 +177,4 @@ chmod +x tools/dist_train.sh
         The submission files cas_r50.csv, cas_se50.csv and cas_x101.csv that finally conform to the official format are located in the submit directory
     
 
-## Contact
 
-     author: rill
-
-     email: 18813124313@163.com
