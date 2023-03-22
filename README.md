@@ -1,184 +1,184 @@
-# Kesci 水下目标检测算法赛  underwater object detection algorithm contest Baseline <font color=red>**A榜 mAP 48.7**</font><br /> 
+# Kesci Underwater Object Detection Algorithm Competition underwater object detection algorithm contest Baseline <font color=red>**A list mAP 48.7**</font><br />
 
-## 比赛地址：[Kesci 水下目标检测](https://www.kesci.com/home/competition/5e535a612537a0002ca864ac)
+## Competition address: [Kesci underwater target detection] (https://www.kesci.com/home/competition/5e535a612537a0002ca864ac)
 
 ## Please refer to the updated [repo](https://github.com/zhengye1995/kesci-2021-underwater-optics) for URPC 2021!!!
 
-## Update 尝试过不work的内容：
+## Update Tried what doesn't work:
 
-+ 数据增强
-  + 翻转旋转
-  + 偏色校准
-  + 亮度、对比度增强
-  + 各种模糊平滑算子
-  + 去雾
-  + mixup
-  + 引入往年数据
-+ 模型集成
-  + 直接nms
-  + 加权nms
-  + wbf
-+ 训练采样
-  + 基于数据分布即domain采样
-  + OHEM
-+ 模型部分
-  + DCN
-  + se154与x101 接近
-+ 误差分析：从rpn很难收敛及OHEM掉分严重可以分析得出目前预测错误主要来源是：
-  + 高分的fp： 相当多一部分是标注漏标错标造成，例如训练集存在相邻帧图片同一目标前一帧标注，后一帧不标情况，例如对于较为模糊的目标是否标注也很不统一
-  + 低分的tp： 这一类主要集中在模糊目标上，模型整体对模糊目标预测的score较低，但是数据的标注对于模糊对象标准并不一致
-  + 漏检： 少数模糊小目标漏检
-## Update 更新使用htc预训练的resnext101 64x4d 线上mAP为**48.7**
-## 整体思路
-   + detection algorithm: Cascade R-CNN 
-   + backbone: ResNet50 + FPN
-   + post process: soft nms
-   + 基于[mmdetection](https://github.com/open-mmlab/mmdetection/), 不是最新版，大家可以自己升级
-   + res50 和se50 均可以达到线上testA 46-47 mAP, 经过[spytensor](https://github.com/spytensor)试验进行模型集成可以达到49+
-   + resnext101 64x4d 48.7mAP
-## 代码环境及依赖
++ data augmentation
+   + flip rotation
+   + color cast calibration
+   + Brightness, contrast enhancement
+   + Various blur smoothing operators
+   + Defog
+   + mixup
+   + Introduce data from previous years
++ model integration
+   + direct nms
+   + weighted nms
+   + wbf
++ training samples
+   + Based on data distribution, i.e. domain sampling
+   + OHEM
++ model section
+   + DCN
+   + se154 is close to x101
++ Error analysis: From the difficulty of rpn convergence and the serious loss of OHEM points, it can be analyzed that the main sources of current prediction errors are:
+   + High-scoring fp: A considerable part of it is caused by missing labels and wrong labels. For example, there are adjacent frames in the training set that have the same target marked in the previous frame and not marked in the next frame. Unite
+   + Low-scoring tp: This category is mainly focused on fuzzy targets. The overall score of the model for fuzzy target prediction is low, but the data annotations are not consistent with the fuzzy target standards.
+   + Missed detection: A few fuzzy small targets missed detection
+## Update Update the online mAP of htc pre-trained resnext101 64x4d to **48.7**
+## the whole idea
+    + detection algorithm: Cascade R-CNN
+    + backbone: ResNet50 + FPN
+    + post process: soft nms
+    + Based on [mmdetection](https://github.com/open-mmlab/mmdetection/), not the latest version, you can upgrade by yourself
+    + Both res50 and se50 can reach online testA 46-47 mAP, and model integration can reach 49+ after [spytensor](https://github.com/spytensor) test
+    + resnext101 64x4d 48.7mAP
+## Code environment and dependencies
 
 + OS: Ubuntu16.10
 + GPU: 2080Ti * 4
 + python: python3.7
-+ nvidia 依赖:
-   - cuda: 10.0.130
-   - cudnn: 7.5.1
-   - nvidia driver version: 430.14
-+ deeplearning 框架: pytorch1.1.0
-+ 其他依赖请参考requirement.txt
-+ 显卡数量不太重要，大家依据自身显卡数量倍数调整学习率大小即可
++ nvidia dependencies:
+    - cuda: 10.0.130
+    - cudnn: 7.5.1
+    - nvidia driver version: 430.14
++ deeplearning framework: pytorch1.1.0
++ Please refer to requirement.txt for other dependencies
++ The number of graphics cards is not important, you can adjust the learning rate according to the multiple of the number of graphics cards you have
 
-## 训练数据准备
+## Training data preparation
 
-- **相应文件夹创建准备**
+- **Corresponding folder creation preparation**
 
-  - 在代码根目录下新建data文件夹，或者依据自身情况建立软链接
-  - 进入data文件夹,创建文件夹:
+   - Create a new data folder under the root directory of the code, or create a soft link according to your own situation
+   - Go to the data folder and create a folder:
   
-     annotations
+      annotations
 
-     pretrained
+      pretrained
 
-     results
+      results
 
-     submit
+      submit
 
-  - 将官方提供的训练和测试数据解压到data目录中，产生：
+   - Unzip the officially provided training and test data into the data directory to generate:
     
-    train
+     train
 
-    test-A-image
+     test-A-image
     
     
-- **label文件格式转换**
+- **label file format conversion**
 
-  - 官方提供的是VOC格式的xml类型label文件，个人习惯使用COCO格式用于训练，所以进行格式转换
+   - The official xml type label file in VOC format is provided. Personally, I am used to using COCO format for training, so format conversion is performed.
   
-  - 使用 tools/data_process/xml2coco.py 将label文件转换为COCO格式，新的label文件 train.json 会保存在 data/train/annotations 目录下
+   - Use tools/data_process/xml2coco.py to convert the label file to COCO format, and the new label file train.json will be saved in the data/train/annotations directory
 
-  - 为了方便利用mmd多进程测试（速度较快），我们对test数据也生成一个伪标签文件,运行 tools/data_process/generate_test_json.py 生成 testA.json, 伪标签文件会保存在data/train/annotations 目录下
+   - In order to facilitate the use of mmd multi-process testing (faster), we also generate a pseudo-label file for the test data, run tools/data_process/generate_test_json.py to generate testA.json, and the pseudo-label file will be saved in the data/train/annotations directory Down
 
-  - 总体运行内容：
+   - Overall operation content:
 
-    - python tools/data_process/xml2coco.py
+     -python tools/data_process/xml2coco.py
 
-    - python tools/data_process/generate_test_json.py
+     -python tools/data_process/generate_test_json.py
 
-- **预训练模型下载**
-  - 下载mmdetection官方开源的casacde-rcnn-r50-fpn-2x的COCO预训练模型[cascade_rcnn_r50_fpn_20e_20181123-db483a09.pth](https://open-mmlab.oss-cn-beijing.aliyuncs.com/mmdetection/models/cascade_rcnn_r50_fpn_20e_20181123-db483a09.pth)并放置于 data/pretrained 目录下
-  - senet50的预训练详见: [mmd-senet](https://github.com/zhengye1995/pretrained), 这里要特别感谢[jsonc](https://github.com/jsnoc) 大佬提供的预训练模型
-  - 下载mmdetection官方开源的htc的[resnext 64x4d 预训练模型](https://s3.ap-northeast-2.amazonaws.com/open-mmlab/mmdetection/models/htc/htc_dconv_c3-c5_mstrain_400_1400_x101_64x4d_fpn_20e_20190408-0e50669c.pth)
+- **Pre-trained model download**
+   - Download mmdetection's official open source casacde-rcnn-r50-fpn-2x COCO pre-training model [cascade_rcnn_r50_fpn_20e_20181123-db483a09.pth](https://open-mmlab.oss-cn-beijing.aliyuncs.com/mmdetection/models/ cascade_rcnn_r50_fpn_20e_20181123-db483a09.pth) and placed in the data/pretrained directory
+   - For the pre-training of senet50, see: [mmd-senet](https://github.com/zhengye1995/pretrained), here I would like to thank [jsonc](https://github.com/jsnoc) for the pre-training training model
+   - Download mmdetection's official open source htc [resnext 64x4d pre-training model] (https://s3.ap-northeast-2.amazonaws.com/open-mmlab/mmdetection/models/htc/htc_dconv_c3-c5_mstrain_400_1400_x101_64x4d_fpn_20e_20195068.9c)
 
-## 依赖安装及编译
+## Dependency installation and compilation
 
 
-- **依赖安装编译**
+- **depends on installation and compilation**
 
-   1. 创建并激活虚拟环境
-        conda create -n underwater python=3.7 -y
-        conda activate underwater
+    1. Create and activate a virtual environment
+         conda create -n underwater python=3.7 -y
+         conda activate underwater
 
-   2. 安装 pytorch
-        conda install pytorch=1.1.0 torchvision=0.3.0 cudatoolkit=10.0 -c pytorch
+    2. Install pytorch
+         conda install pytorch=1.1.0 torchvision=0.3.0 cudatoolkit=10.0 -c pytorch
         
-   3. 安装其他依赖
-        pip install cython && pip --no-cache-dir install -r requirements.txt
+    3. Install other dependencies
+         pip install cython && pip --no-cache-dir install -r requirements.txt
    
-   4. 编译cuda op等：
-        python setup.py develop
+    4. Compile cuda op, etc.:
+         python setup.py develop
    
 
-## 模型训练及预测
+## Model training and prediction
     
-   - **训练**
+    - **train**
 
-	1. 运行：
+1. Run:
         
-        r50:
+         r50:
         
-		chmod +x tools/dist_train.sh
+chmod +x tools/dist_train.sh
 
-        ./tools/dist_train.sh configs/underwater/cas_r50/cascade_rcnn_r50_fpn_1x.py 4
+         ./tools/dist_train.sh configs/underwater/cas_r50/cascade_rcnn_r50_fpn_1x.py 4
         
-        se50:
+         se50:
         
-		chmod +x tools/dist_train.sh
+chmod +x tools/dist_train.sh
 
-        ./tools/dist_train.sh configs/underwater/cas_se/cas_se50_12ep.py 4
+         ./tools/dist_train.sh configs/underwater/cas_se/cas_se50_12ep.py 4
         
-        x101_64x4d (htc pretrained):
+         x101_64x4d (htc pretrained):
         
-		chmod +x tools/dist_train.sh
+chmod +x tools/dist_train.sh
 
-        ./tools/dist_train.sh configs/underwater/cas_x101/cascade_rcnn_x101_64x4d_fpn_1x.py 4
+         ./tools/dist_train.sh configs/underwater/cas_x101/cascade_rcnn_x101_64x4d_fpn_1x.py 4
         
-        (上面的4是我的gpu数量，请自行修改)
+         (The above 4 is the number of my gpu, please modify it yourself)
 
-   	2. 训练过程文件及最终权重文件均保存在config文件中指定的workdir目录中
+    2. Both the training process file and the final weight file are saved in the workdir directory specified in the config file
 
-   - **预测**
+    - **predict**
 
-    1. 运行:
+     1. Run:
     
-        r50:
+         r50:
 
-        chmod +x tools/dist_test.sh
+         chmod +x tools/dist_test.sh
 
-        ./tools/dist_test.sh configs/underwater/cas_r50/cascade_rcnn_r50_fpn_1x.py workdirs/cascade_rcnn_r50_fpn_1x/latest.pth 4 --json_out results/cas_r50.json
+         ./tools/dist_test.sh configs/underwater/cas_r50/cascade_rcnn_r50_fpn_1x.py workdirs/cascade_rcnn_r50_fpn_1x/latest.pth 4 --json_out results/cas_r50.json
 
-        (上面的4是我的gpu数量，请自行修改)
+         (The above 4 is the number of my gpu, please modify it yourself)
         
-        se50:
+         se50:
 
-        chmod +x tools/dist_test.sh
+         chmod +x tools/dist_test.sh
 
-        ./tools/dist_test.sh configs/underwater/cas_se/cas_se50_12ep.py workdirs/cas_se50_12ep/latest.pth 4 --json_out results/cas_se50.json
+         ./tools/dist_test.sh configs/underwater/cas_se/cas_se50_12ep.py workdirs/cas_se50_12ep/latest.pth 4 --json_out results/cas_se50.json
 
-        (上面的4是我的gpu数量，请自行修改)
+         (The above 4 is the number of my gpu, please modify it yourself)
         
-        x101_64x4d (htc pretrained):
+         x101_64x4d (htc pretrained):
 
-        chmod +x tools/dist_test.sh
+         chmod +x tools/dist_test.sh
 
-        ./tools/dist_test.sh configs/underwater/cas_x101/cascade_rcnn_x101_64x4d_fpn_1x.py workdirs/cas_x101_64x4d_fpn_htc_1x/latest.pth 4 --json_out results/cas_x101.json
+         ./tools/dist_test.sh configs/underwater/cas_x101/cascade_rcnn_x101_64x4d_fpn_1x.py workdirs/cas_x101_64x4d_fpn_htc_1x/latest.pth 4 --json_out results/cas_x101.json
 
 
-    2. 预测结果文件会保存在 /results 目录下
+     2. The prediction result file will be saved in the /results directory
 
-    3. 转化mmd预测结果为提交csv格式文件：
+     3. Convert the mmd prediction result to submit a csv format file:
        
-       python tools/post_process/json2submit.py --test_json cas_r50.bbox.json --submit_file cas_r50.csv
+        python tools/post_process/json2submit.py --test_json cas_r50.bbox.json --submit_file cas_r50.csv
        
-       python tools/post_process/json2submit.py --test_json cas_se50.bbox.json --submit_file cas_se50.csv
+        python tools/post_process/json2submit.py --test_json cas_se50.bbox.json --submit_file cas_se50.csv
        
-       python tools/post_process/json2submit.py --test_json cas_x101.bbox.json --submit_file cas_x101.csv
+        python tools/post_process/json2submit.py --test_json cas_x101.bbox.json --submit_file cas_x101.csv
 
-       最终符合官方要求格式的提交文件 cas_r50.csv, cas_se50.csv 和 cas_x101.csv 位于 submit目录下
+        The submission files cas_r50.csv, cas_se50.csv and cas_x101.csv that finally conform to the official format are located in the submit directory
     
 
 ## Contact
 
-    author：rill
+     author: rill
 
-    email：18813124313@163.com
+     email: 18813124313@163.com
